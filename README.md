@@ -1,12 +1,12 @@
 # BioGPT: A Biologically-Inspired Dendritic Language Model
 
-**A novel neural architecture that replaces standard transformer attention with dendritic neurons, cortical columns, and feedback connections inspired by mammalian neocortex -- and beats Pythia-160M after pruning nearly half its weights.**
+**A novel neural architecture that replaces standard transformer attention with dendritic neurons and cortical columns inspired by mammalian neocortex -- and beats Pythia-160M after pruning nearly half its weights.**
 
 ---
 
 ## TL;DR
 
-We built a language model where each "attention layer" is replaced by **biologically realistic neurons with dendritic branches, NMDA-like temporal memory, per-neuron processing, and cortical feedback loops**. Trained on 2B tokens of The Pile, BioGPT achieves a perplexity of **21.2 after pruning 45% of its weights** -- outperforming the unpruned Pythia-160M transformer (perplexity 31.5) at roughly the same parameter count. The dendritic architecture distributes knowledge more efficiently across its weights, making it naturally resilient to pruning -- just like biological synaptic pruning in the developing brain.
+We built a language model where each "attention layer" is replaced by **biologically realistic neurons with dendritic branches, per-branch computation, and per-neuron processing organized into cortical columns**. Trained on 2B tokens of The Pile, BioGPT achieves a perplexity of **21.2 after pruning 45% of its weights** -- outperforming the unpruned Pythia-160M transformer (perplexity 31.5) at roughly the same parameter count. The dendritic architecture distributes knowledge more efficiently across its weights, making it naturally resilient to pruning -- just like biological synaptic pruning in the developing brain.
 
 ---
 
@@ -52,19 +52,19 @@ Input Tokens
 [Token + Position Embedding]
      |
      v
-+--[Cortical Layer 0-3 (EARLY)]---+     Gated Feedback
-|  2 neurons x 8 branches each    |  <--- (deep -> early)
-|  Fine-grained pattern detection  |          |
-+----------------------------------+          |
-     |                                        |
-     v                                        |
-+--[Cortical Layer 4-7 (MIDDLE)]---+          |
-|  3 neurons x [8,6,4] branches    |          |
-|  Multi-scale association          |          |
-+----------------------------------+          |
-     |                                        |
-     v                                        |
-+--[Cortical Layer 8-11 (LATE)]----+----------+
++--[Cortical Layer 0-3 (EARLY)]---+
+|  2 neurons x 8 branches each    |
+|  Fine-grained pattern detection  |
++----------------------------------+
+     |
+     v
++--[Cortical Layer 4-7 (MIDDLE)]---+
+|  3 neurons x [8,6,4] branches    |
+|  Multi-scale association          |
++----------------------------------+
+     |
+     v
++--[Cortical Layer 8-11 (LATE)]----+
 |  2 neurons x 4 branches each    |
 |  Abstract reasoning / output     |
 +----------------------------------+
@@ -80,7 +80,7 @@ Each `EfficientBioNeuron` implements the full dendritic processing pipeline usin
 ```
 Input (B, T, 768)
      |
-     +---> [Multi-Head Attention]  (branches = heads, with NMDA-enriched V)
+     +---> [Multi-Head Attention]  (branches = heads)
      |          |
      |          v
      |     [Causal Temporal Conv1d]  (local dendritic integration, kernel=5)
@@ -105,14 +105,12 @@ Output (B, T, 768)
 | Architecture Component | Biological Inspiration | Implementation |
 |---|---|---|
 | **Dendritic branches** | Dendrites on pyramidal neurons | Multi-head attention (each head = branch) |
-| **NMDA temporal trace** | NMDA receptor slow decay current | Learnable exponential decay enriching V |
 | **Causal Conv1d** | Local dendritic integration | Depthwise causal convolution (kernel=5) |
 | **Per-branch FFN** | Dendritic computation | Grouped Conv1d (separate weights per branch) |
 | **Per-branch norm** | Local dendritic homeostasis | GroupNorm (per-position to prevent leakage) |
 | **Soma FFN** | Cell body integration | Per-neuron feed-forward network |
 | **Cortical columns** | Neocortical minicolumns | Multiple neurons per layer with softmax competition |
 | **Cortical layout** | Sensory->Association->Motor hierarchy | Early: many small branches, Late: few large branches |
-| **Gated feedback** | Layer 5/6 -> Layer 2/3 projections | Learned sigmoid gate on deep->early connections |
 | **Magnitude pruning** | Synaptic pruning during development | Remove smallest weights globally |
 | **Dead neuron removal** | Neuronal apoptosis | Kill neurons with >95% weights pruned |
 
@@ -260,7 +258,7 @@ Pythia-160M at its step-1000 checkpoint (2B tokens on The Pile). Same tokenizer,
 
 Our pruning pipeline mirrors biological synaptic pruning:
 
-1. **Magnitude pruning** (synaptic pruning): Remove the smallest-magnitude weights globally across all prunable layers (skip embeddings, norms, and NMDA parameters)
+1. **Magnitude pruning** (synaptic pruning): Remove the smallest-magnitude weights globally across all prunable layers (skip embeddings and norms)
 2. **Dead neuron removal** (apoptosis): If >95% of a neuron's weights are pruned, zero out all remaining weights -- a mostly-disconnected neuron provides no useful computation
 3. **Fine-tuning with mask** (recovery): 500 steps of fine-tuning with a binary mask that keeps pruned weights at zero, allowing the surviving network to adapt
 4. **Re-evaluation**: Measure val loss and perplexity on held-out data
@@ -279,7 +277,6 @@ biogpt-dendritic/
     generate.py       # Text generation from checkpoint
   results/
     phase3_comparison.json   # Final BioGPT vs Pythia results
-    ablation_results.json    # Ablation study data
   scripts/
     generate_charts.py       # Regenerate all figures
     run_comparison.sh        # One-command full pipeline
@@ -298,10 +295,8 @@ This is an active research direction. Key next steps:
 
 - [ ] **Scale to 1B+ parameters** -- Test whether the pruning resilience advantage holds (or grows) at larger scale
 - [ ] **Instruction tuning** -- Fine-tune on instruction-following data to produce a chat-capable BioGPT
-- [ ] **Fix NMDA state propagation** -- Currently disabled during training due to gradient checkpointing; implement custom checkpoint-compatible state passing
 - [ ] **Structured pruning** -- Move beyond unstructured magnitude pruning to remove entire branches/neurons for actual inference speedup
 - [ ] **Standard benchmarks** -- Evaluate on HellaSwag, PIQA, WinoGrande, ARC, LAMBADA for published comparisons
-- [ ] **Multi-pass refinement** -- Re-enable the 2-pass feedback mechanism and measure its impact at scale
 - [ ] **Dynamic branch gating** -- Let the model learn to activate different branches for different inputs (mixture-of-dendrites)
 - [ ] **Biological learning rules** -- Replace backprop with Hebbian or STDP-like local learning rules for branches
 
@@ -315,8 +310,8 @@ This is an active research direction. Key next steps:
   author    = {Hamond, Luke},
   year      = {2026},
   url       = {https://github.com/lukehamond1001-alt/biogpt-dendritic},
-  note      = {Dendritic neurons with NMDA traces, cortical columns,
-               and gated feedback for pruning-resilient language modeling}
+  note      = {Dendritic neurons with per-branch computation, cortical columns,
+               and pruning-resilient language modeling}
 }
 ```
 

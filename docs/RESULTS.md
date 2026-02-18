@@ -91,38 +91,6 @@ Several architectural features likely contribute:
 3. **Cortical hierarchy**: Different branch granularities at different depths create a natural diversity of representation scales
 4. **Biological parallel**: This mirrors synaptic pruning in the developing brain -- the brain starts with far more synapses than it needs, and pruning strengthens the remaining connections
 
-## Ablation Study
-
-Tested at small scale (~800K-888K params, 100K training steps) to understand the contribution of each biological feature.
-
-| Config | Features | Val Loss | Params |
-|---|---|---|---|
-| (a) Full Branch | All features | 1.422 | 888K |
-| (b) No FFN | No per-branch FFN | 1.387 | 821K |
-| (c) No NMDA | No temporal trace | 1.394 | 888K |
-| (d) NMDA Only | Attention + NMDA only | 1.380 | 820K |
-| (e) Bare (=MHA) | Standard multi-head attn | 1.378 | 820K |
-| (f) Std GPT | Standard transformer | 1.569 | 821K |
-
-### Analysis
-
-**Standard GPT is the worst**: At 1.569, it's significantly worse than any dendritic variant (1.378-1.422). This gap holds even though GPT has similar parameter counts.
-
-**Individual features show diminishing returns at small scale**: The bare multi-head attention (1.378) slightly outperforms the full branch (1.422) when the model has fewer than 1M parameters. This makes sense -- the additional components add overhead that only pays off with scale.
-
-**The full combination wins at scale**: At 294M parameters trained on 2B tokens, the full BioGPT with all features achieves 2.86 val loss and shows superior pruning resilience. The redundancy that seemed wasteful at small scale becomes the source of pruning strength at larger scale.
-
-### Domain-Specific Performance (Ablation)
-
-| Config | Shakespeare | Code | Data | Math |
-|---|---|---|---|---|
-| (a) Full Branch | 2.087 | 0.629 | 0.679 | 1.033 |
-| (b) No FFN | 2.095 | 0.632 | 0.664 | 1.062 |
-| (c) No NMDA | 2.093 | 0.622 | 0.655 | 1.045 |
-| (f) Std GPT | 2.235 | 0.870 | 0.743 | 1.228 |
-
-The dendritic architecture shows particular advantage on code (0.63 vs 0.87) and math (1.03 vs 1.23), likely because the per-branch structure enables learning domain-specific features.
-
 ## Generation Quality Assessment
 
 Beyond loss and perplexity, I personally read through every generation output from both models at each pruning level. Each model received 5 prompts (knowledge, reasoning, code, science, instruction) at every sparsity point, plus 12 prompts in the unpruned head-to-head.
@@ -159,6 +127,5 @@ The qualitative assessment strongly reinforces the quantitative results: BioGPT'
 
 1. **Single training run**: Results from one training run each. Statistical significance would require multiple seeds.
 2. **Parameter mismatch**: BioGPT starts at 294M and is pruned to 180M; Pythia starts at 162M. While we compare at similar active parameter counts, the architectures are fundamentally different in how they use those parameters.
-3. **NMDA traces non-functional during training**: Due to gradient checkpointing constraints, NMDA temporal states are not propagated during training. The NMDA parameters are learned but the trace mechanism is effectively disabled.
-4. **Limited evaluation**: We measure validation loss on The Pile only. Standard NLP benchmarks (HellaSwag, PIQA, ARC, etc.) would provide more comprehensive evaluation.
-5. **Unstructured pruning**: Our magnitude pruning removes individual weights but doesn't reduce compute cost. Structured pruning (removing entire branches/neurons) would be needed for actual inference speedup.
+3. **Limited evaluation**: We measure validation loss on The Pile only. Standard NLP benchmarks (HellaSwag, PIQA, ARC, etc.) would provide more comprehensive evaluation.
+4. **Unstructured pruning**: Our magnitude pruning removes individual weights but doesn't reduce compute cost. Structured pruning (removing entire branches/neurons) would be needed for actual inference speedup.

@@ -5,13 +5,12 @@ A novel transformer variant where standard attention layers are replaced by
 biologically-motivated dendritic neurons organized into cortical columns.
 
 Architecture Hierarchy:
-    Branch (dendrite) -> Neuron (soma) -> Layer (cortical column) -> Feedback
+    Branch (dendrite) -> Neuron (soma) -> Layer (cortical column)
 
 Features per Branch (batched as multi-head attention + grouped ops):
     - Q/K/V causal attention (batched as multi-head attention)
     - Per-branch FFN via grouped Conv1d (each branch has own weights)
     - Per-branch LayerNorm via GroupNorm
-    - NMDA temporal trace (decaying memory enriching V)
     - Causal temporal Conv1d (local dendritic integration, parallel)
 
 Features per Neuron:
@@ -23,10 +22,6 @@ Features per Layer:
     - Multiple neurons (cortical column)
     - Weighted combination of neuron outputs (softmax competition)
     - Cortical layout: early=many small branches, late=few large
-
-Features across Layers:
-    - Gated feedback connections (deep -> early, like cortical Layer 5/6 -> 2/3)
-    - Optional multi-pass refinement
 """
 
 import torch
@@ -477,7 +472,6 @@ if __name__ == "__main__":
     print("=" * 70)
 
     layout = generate_cortical_layout(768, 12)
-    fb_pairs = generate_feedback_pairs(12)
 
     total_branches = 0
     print(f"\n  Cortical Layout:")
@@ -493,10 +487,6 @@ if __name__ == "__main__":
               f"{branches} branches | {branch_info}")
 
     print(f"    Total branches: {total_branches}")
-
-    print(f"\n  Feedback connections:")
-    for s, t in fb_pairs:
-        print(f"    Layer {s} -> Layer {t}")
 
     print(f"\n  Building model...")
     model = create_biogpt()

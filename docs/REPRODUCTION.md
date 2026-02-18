@@ -46,12 +46,6 @@ Expected output (key lines):
     Layer  8 [ LATE]: 2 neurons |  8 branches | ['4x192', '4x192']
     Total branches: 168
 
-  Feedback connections:
-    Layer 8 -> Layer 0
-    Layer 9 -> Layer 1
-    Layer 10 -> Layer 2
-    Layer 11 -> Layer 3
-
   BioGPT total:      ~294,500,000
 ```
 

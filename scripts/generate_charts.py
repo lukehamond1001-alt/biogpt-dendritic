@@ -88,44 +88,6 @@ def pruning_curve():
     print("  Saved pruning_curve.png")
 
 
-def ablation_chart():
-    """Ablation study: impact of each biological feature."""
-
-    configs = [
-        "(a) Full\nBranch",
-        "(b) No\nFFN",
-        "(c) No\nNMDA",
-        "(d) NMDA\nOnly",
-        "(e) Bare\n(=MHA)",
-        "(f) Std\nGPT",
-    ]
-    val_losses = [1.422, 1.387, 1.394, 1.380, 1.378, 1.569]
-
-    fig, ax = plt.subplots(figsize=(10, 5.5))
-
-    colors = [BIO_COLOR] * 5 + [PYTHIA_COLOR]
-    bars = ax.bar(configs, val_losses, color=colors, width=0.6, edgecolor="white",
-                  linewidth=1.5, zorder=3)
-
-    for bar, v in zip(bars, val_losses):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.008,
-                f"{v:.3f}", ha="center", va="bottom", fontsize=10, fontweight="bold")
-
-    ax.set_ylabel("Validation Loss")
-    ax.set_title("Ablation Study: Contribution of Biological Features")
-    ax.set_ylim(1.30, 1.62)
-    ax.grid(True, alpha=0.3, axis="y")
-
-    # Add a horizontal line for std GPT baseline
-    ax.axhline(y=1.569, color=PYTHIA_COLOR, linestyle=":", alpha=0.5, linewidth=1.5)
-    ax.text(5.5, 1.575, "Standard GPT baseline", ha="center", va="bottom",
-            fontsize=9, color=PYTHIA_COLOR, fontstyle="italic")
-
-    fig.savefig(os.path.join(ASSETS, "ablation_chart.png"))
-    plt.close(fig)
-    print("  Saved ablation_chart.png")
-
-
 def cortical_layout():
     """Visualize the cortical layout: neurons and branches per layer."""
 
@@ -238,7 +200,6 @@ def param_comparison():
 if __name__ == "__main__":
     print("Generating charts...")
     pruning_curve()
-    ablation_chart()
     cortical_layout()
     param_comparison()
     print("Done! Charts saved to assets/")
