@@ -186,25 +186,6 @@ BioGPT's dendritic architecture shows **real pruning resilience**. The quality c
 
 ---
 
-## Ablation Study
-
-Which biological features actually matter? We tested each component in isolation:
-
-![Ablation Study](assets/ablation_chart.png)
-
-| Configuration | Val Loss | Description |
-|---|---|---|
-| (a) Full Branch | 1.422 | All features: attention + FFN + NMDA + conv + norm |
-| (b) No FFN | 1.387 | Remove per-branch FFN |
-| (c) No NMDA | 1.394 | Remove temporal memory trace |
-| (d) NMDA Only | 1.380 | Only attention + NMDA (minimal branch) |
-| (e) Bare (=MHA) | 1.378 | Standard multi-head attention only |
-| **(f) Std GPT** | **1.569** | Standard GPT transformer block |
-
-**Key finding**: Every dendritic variant significantly beats the standard GPT architecture (1.38-1.42 vs 1.57). The individual components show diminishing returns at small scale, but the full combination shines at scale with pruning -- where the redundancy built into the branch structure provides resilience.
-
----
-
 ## Quick Start
 
 ### Installation
