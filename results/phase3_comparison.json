@@ -1,0 +1,54 @@
+{
+  "description": "BioGPT (294M) vs Pythia-160M (162M) head-to-head comparison",
+  "training": {
+    "biogpt": {
+      "total_params": 294500000,
+      "tokens_trained": 2000000000,
+      "dataset": "The Pile",
+      "tokenizer": "GPT-NeoX-20B (same as Pythia)",
+      "d_model": 768,
+      "n_layers": 12,
+      "max_seq_len": 1024,
+      "optimizer": "AdamW (betas 0.9/0.95, wd=0.1)",
+      "max_lr": 6e-4,
+      "batch_size": "4 micro x 8 grad_accum = 32 effective"
+    },
+    "pythia": {
+      "total_params": 162322944,
+      "checkpoint": "step1000 (2B tokens on The Pile)",
+      "source": "EleutherAI/pythia-160m"
+    }
+  },
+  "baseline_val_loss": {
+    "biogpt_294M": 2.86,
+    "pythia_162M": 3.45
+  },
+  "pruning_curve": {
+    "biogpt": [
+      {"sparsity_pct": 0,  "nonzero_params_M": 294, "val_loss": 2.86, "perplexity": 17.5},
+      {"sparsity_pct": 25, "nonzero_params_M": 231, "val_loss": 2.92, "perplexity": 18.5},
+      {"sparsity_pct": 45, "nonzero_params_M": 180, "val_loss": 3.05, "perplexity": 21.2},
+      {"sparsity_pct": 70, "nonzero_params_M": 116, "val_loss": 4.12, "perplexity": 61.7},
+      {"sparsity_pct": 90, "nonzero_params_M": 65,  "val_loss": 6.99, "perplexity": 1084}
+    ],
+    "pythia": [
+      {"sparsity_pct": 0,  "nonzero_params_M": 162, "val_loss": 3.45, "perplexity": 31.5},
+      {"sparsity_pct": 25, "nonzero_params_M": 141, "val_loss": 3.63, "perplexity": 37.7},
+      {"sparsity_pct": 50, "nonzero_params_M": 120, "val_loss": 3.72, "perplexity": 41.4},
+      {"sparsity_pct": 70, "nonzero_params_M": 103, "val_loss": 4.67, "perplexity": 106.8},
+      {"sparsity_pct": 90, "nonzero_params_M": 86,  "val_loss": 6.79, "perplexity": 889}
+    ]
+  },
+  "headline_result": {
+    "description": "BioGPT at 45% sparsity (180M active params) beats unpruned Pythia-160M (162M params)",
+    "biogpt_45pct": {"params_M": 180, "val_loss": 3.05, "perplexity": 21.2},
+    "pythia_unpruned": {"params_M": 162, "val_loss": 3.45, "perplexity": 31.5},
+    "loss_advantage": 0.40,
+    "perplexity_advantage": 10.3
+  },
+  "pruning_method": {
+    "strategy": "Global magnitude pruning (smallest absolute weights removed first)",
+    "post_prune_finetuning": "500 steps with mask (zeroed weights stay zero)",
+    "dead_neuron_cleanup": "Neurons with >95% weights zeroed are fully removed (apoptosis)"
+  }
+}

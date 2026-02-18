@@ -1,0 +1,7 @@
+torch>=2.0
+transformers>=4.36
+numpy
+datasets
+tokenizers
+accelerate
+matplotlib

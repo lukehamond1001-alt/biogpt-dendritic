@@ -1,0 +1,128 @@
+{
+  "(a) Full Branch": {
+    "val_loss": 1.4223098695278167,
+    "params": 888539,
+    "time": 276.2643847465515,
+    "domain_losses": {
+      "shakespeare": 2.0871304353078206,
+      "code": 0.6294774274031322,
+      "data": 0.6787859837214152,
+      "math": 1.0332535525163016
+    },
+    "output_scores": {
+      "code_brackets": 1.0,
+      "code_indent": 1.0,
+      "code_funcs": 4,
+      "code_entropy": 4.283967193504096,
+      "math_tables": 0.10714285714285714,
+      "math_eqs": 0.0,
+      "math_entropy": 3.1826411206601586,
+      "long_math_tables": 0.08333333333333333
+    }
+  },
+  "(b) No FFN": {
+    "val_loss": 1.3873646408319473,
+    "params": 821467,
+    "time": 244.4237720966339,
+    "domain_losses": {
+      "shakespeare": 2.095430930455526,
+      "code": 0.6319895168145497,
+      "data": 0.663910311460495,
+      "math": 1.0616450746854147
+    },
+    "output_scores": {
+      "code_brackets": 1.0,
+      "code_indent": 1.0,
+      "code_funcs": 3,
+      "code_entropy": 4.533612157770782,
+      "math_tables": 0.07142857142857142,
+      "math_eqs": 0.0,
+      "math_entropy": 3.2245359981027923,
+      "long_math_tables": 0.0625
+    }
+  },
+  "(c) No NMDA": {
+    "val_loss": 1.39359150826931,
+    "params": 888027,
+    "time": 284.0472149848938,
+    "domain_losses": {
+      "shakespeare": 2.092816678682963,
+      "code": 0.6219342549641927,
+      "data": 0.6547411501407623,
+      "math": 1.044997509320577
+    },
+    "output_scores": {
+      "code_brackets": 1.0,
+      "code_indent": 0.8333333333333334,
+      "code_funcs": 4,
+      "code_entropy": 4.205060003802657,
+      "math_tables": 0.11538461538461539,
+      "math_eqs": 0.0,
+      "math_entropy": 3.2545163578954885,
+      "long_math_tables": 0.07692307692307693
+    }
+  },
+  "(d) NMDA Only": {
+    "val_loss": 1.3801440119743347,
+    "params": 820443,
+    "time": 241.18151593208313,
+    "domain_losses": {
+      "shakespeare": 2.085911210378011,
+      "code": 0.6048564910888672,
+      "data": 0.6658389906088511,
+      "math": 1.0776427825291952
+    },
+    "output_scores": {
+      "code_brackets": 0.9333333333333333,
+      "code_indent": 0.875,
+      "code_funcs": 2,
+      "code_entropy": 4.401741075776273,
+      "math_tables": 0.08333333333333333,
+      "math_eqs": 0.0,
+      "math_entropy": 3.3760179752237636,
+      "long_math_tables": 0.07692307692307693
+    }
+  },
+  "(e) Bare (=MHA)": {
+    "val_loss": 1.3784013450145722,
+    "params": 819931,
+    "time": 234.72655701637268,
+    "domain_losses": {
+      "shakespeare": 2.068828733762105,
+      "code": 0.633764511346817,
+      "data": 0.6714572866757711,
+      "math": 1.0745280186335247
+    },
+    "output_scores": {
+      "code_brackets": 0.9230769230769231,
+      "code_indent": 0.8571428571428571,
+      "code_funcs": 2,
+      "code_entropy": 4.439883650228726,
+      "math_tables": 0.09090909090909091,
+      "math_eqs": 0.0,
+      "math_entropy": 3.4615313320844554,
+      "long_math_tables": 0.11764705882352941
+    }
+  },
+  "(f) Std GPT": {
+    "val_loss": 1.5689939260482788,
+    "params": 821467,
+    "time": 260.5052812099457,
+    "domain_losses": {
+      "shakespeare": 2.235038407643636,
+      "code": 0.8702755848566691,
+      "data": 0.7430202861626943,
+      "math": 1.2279710094134013
+    },
+    "output_scores": {
+      "code_brackets": 0.75,
+      "code_indent": 1.0,
+      "code_funcs": 1,
+      "code_entropy": 4.3744190634742255,
+      "math_tables": 0.06451612903225806,
+      "math_eqs": 0.0,
+      "math_entropy": 3.104757752702359,
+      "long_math_tables": 0.0425531914893617
+    }
+  }
+}
