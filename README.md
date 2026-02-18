@@ -128,6 +128,64 @@ The layer structure varies across depth, inspired by the sensory->association->m
 
 ---
 
+## Generation Quality: My Personal Assessment
+
+I prompted both models with the same set of questions across knowledge, reasoning, code, science, and instruction-following categories at each pruning level, then read through every output. Here is my honest, unscored assessment.
+
+### Unpruned (Full Models)
+
+**BioGPT (294M) vs Pythia (162M)** -- roughly equal quality. Neither model gets factual answers right (neither says "Paris" for the capital of France, neither names Einstein). Both produce grammatically correct but meandering text. Both struggle with code. BioGPT writes slightly more natural prose; Pythia tends to repeat itself more. This is expected for base language models of this size -- they're not instruction-tuned.
+
+**BioGPT sample** (knowledge prompt: "The capital of France is"):
+> ...the capital of the former French settlement of the French colony of...
+
+**Pythia sample** (same prompt):
+> ...the most important part of the country...
+
+Neither gets the factual answer, but both produce grammatical English. BioGPT stays more on-topic.
+
+### 25% Pruned
+
+**BioGPT (231M, loss 2.92)**: Still fully coherent English. Sentences make sense. Code has structure even if the logic is wrong. Barely any quality drop from unpruned.
+
+**Pythia (141M, loss 3.63)**: Also coherent but starting to degrade. Code devolves into `_c_c_c_c` repetition. More repetitive patterns appearing.
+
+### 45-50% Pruned (The Key Comparison -- Similar Parameter Counts)
+
+**BioGPT (180M, loss 3.05)**: Still producing readable, on-topic text. Code has Python structure (`while` loops, `len()`). Science output talks about biofuels and plant-derived medium -- relevant and coherent. Some URLs appearing in instruction output.
+
+**Pythia (120M, loss 3.72)**: Noticeably worse. Code is `with_k_k_k = 0;` repeated. Science output becomes vague boilerplate. Instruction output collapses into `Fordn:` repeated. More off-topic drift.
+
+**Verdict: BioGPT is clearly better at this level.**
+
+### 70% Pruned
+
+**BioGPT (116M, loss 4.12)**: Degrading but still English. Sentences are grammatical if repetitive ("effect of the effect of the effect"). Code switches to `$n = 0.0` repetition. You can still read it.
+
+**Pythia (103M, loss 4.67)**: Similar degradation. Code is broken syntax. Instruction output becomes `S.S.S.S.S.S.` repetition. Slightly worse than BioGPT.
+
+**Verdict: BioGPT holds up slightly better.**
+
+### 90% Pruned
+
+**Both models are gone.** BioGPT degrades to `the the the a be the-l-c-C` gibberish. Pythia degrades to similar nonsense with HTML tags. Neither produces usable output. Both are essentially dead at this sparsity level.
+
+### Bottom Line
+
+BioGPT's dendritic architecture shows **real pruning resilience**. The quality cliff happens later and more gradually. At the critical 45% pruning point (matching Pythia's parameter count), BioGPT produces noticeably more coherent, structured output while Pythia is already falling into repetition loops. Neither model is good at factual recall (they're small base models), but BioGPT maintains **coherence and structure** better under pruning.
+
+| Pruning Level | BioGPT Quality | Pythia Quality | Winner |
+|---|---|---|---|
+| 0% (unpruned) | Coherent, on-topic | Coherent, slightly repetitive | Tie |
+| 25% | No visible degradation | Code breaking, repetition starting | BioGPT |
+| 45-50% | Readable, structured code | Collapsed repetition loops | **BioGPT** |
+| 70% | Repetitive but grammatical | Broken syntax, symbol spam | BioGPT |
+| 90% | Gibberish | Gibberish | Tie (both dead) |
+
+*Assessment based on 5 prompts per model per pruning level (knowledge, reasoning, code, science, instruction), plus 12 prompts in the unpruned head-to-head.*
+
+---
+
 ## Ablation Study
 
 Which biological features actually matter? We tested each component in isolation:

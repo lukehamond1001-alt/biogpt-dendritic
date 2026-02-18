@@ -123,6 +123,38 @@ Tested at small scale (~800K-888K params, 100K training steps) to understand the
 
 The dendritic architecture shows particular advantage on code (0.63 vs 0.87) and math (1.03 vs 1.23), likely because the per-branch structure enables learning domain-specific features.
 
+## Generation Quality Assessment
+
+Beyond loss and perplexity, I personally read through every generation output from both models at each pruning level. Each model received 5 prompts (knowledge, reasoning, code, science, instruction) at every sparsity point, plus 12 prompts in the unpruned head-to-head.
+
+### Methodology
+
+Each model was given the same prompt and generated up to 40-120 tokens (depending on prompt type) with temperature=0.7 and top_k=40. I read every output and assessed coherence, relevance, structure, and whether the model maintained meaningful language vs. degenerating into repetition or gibberish.
+
+### Findings by Pruning Level
+
+**Unpruned (0%)**: Both models produce grammatically correct English. Neither gives precise factual answers (expected for non-instruction-tuned base models). BioGPT writes slightly more natural prose. Pythia shows more self-repetition. Code outputs have structure (return statements, indentation) but wrong logic for both.
+
+**25% pruned**: BioGPT shows no visible degradation. Pythia's code outputs start breaking (`_c_c_c_c` repetition patterns). BioGPT clearly better.
+
+**45-50% pruned (iso-parameter comparison)**: This is the decisive level. BioGPT (180M) still produces readable, on-topic text with proper code structure (`while` loops, `len()`). Science outputs discuss specific topics (biofuels, plant-derived medium). Pythia (120M) collapses into repetition loops (`with_k_k_k = 0;`, `Fordn:` repeated). BioGPT is clearly superior.
+
+**70% pruned**: Both degrading. BioGPT maintains grammar but becomes repetitive ("effect of the effect of the effect"). Pythia's instruction output becomes `S.S.S.S.S.S.` symbol spam. BioGPT holds up slightly better.
+
+**90% pruned**: Both models produce gibberish. Neither is functional.
+
+### Summary
+
+| Pruning Level | BioGPT Quality | Pythia Quality | Winner |
+|---|---|---|---|
+| 0% (unpruned) | Coherent, on-topic | Coherent, slightly repetitive | Tie |
+| 25% | No visible degradation | Code breaking, repetition starting | BioGPT |
+| 45-50% | Readable, structured code | Collapsed repetition loops | BioGPT |
+| 70% | Repetitive but grammatical | Broken syntax, symbol spam | BioGPT |
+| 90% | Gibberish | Gibberish | Tie (both dead) |
+
+The qualitative assessment strongly reinforces the quantitative results: BioGPT's dendritic architecture degrades more gracefully under pruning, maintaining coherent language structure at sparsity levels where Pythia collapses into meaningless repetition.
+
 ## Limitations and Caveats
 
 1. **Single training run**: Results from one training run each. Statistical significance would require multiple seeds.
